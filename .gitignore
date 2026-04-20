@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript / tooling caches
+*.tsbuildinfo
+
+# Vite config should be .ts only; ignore accidental emit from tsc
+vite.config.js
+vite.config.d.ts
+
+# Test / coverage
+coverage/
+
+# Editor (optional — uncomment if you prefer not to commit)
+# .idea/
