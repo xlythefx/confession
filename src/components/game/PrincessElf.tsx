@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameState } from '../../hooks/useGameState';
+import PicnicCat from './PicnicCat';
 
 interface Props {
   position?: [number, number, number];
@@ -100,6 +101,8 @@ export default function PrincessElf({ position = [0, 0, 0] }: Props) {
         <meshStandardMaterial color="#e9bfa0" roughness={1} />
       </mesh>
 
+      <PicnicCat />
+
       <group ref={bodyRef}>
         {/* Torso — sitting/leaning pose */}
         <mesh castShadow position={[0, 0.25, 0]} rotation={[-0.25, 0, 0]}>
@@ -146,13 +149,13 @@ export default function PrincessElf({ position = [0, 0, 0] }: Props) {
             <sphereGeometry args={[0.1, 10, 8]} />
             <meshStandardMaterial color="#caa05a" roughness={0.9} />
           </mesh>
-          {/* Ears */}
-          <mesh position={[-0.24, -0.02, -0.02]} rotation={[0, 0, -0.5]}>
-            <coneGeometry args={[0.05, 0.14, 8]} />
+          {/* Ears — longer pointy elf */}
+          <mesh position={[-0.26, -0.02, -0.02]} rotation={[0, 0, -0.5]}>
+            <coneGeometry args={[0.07, 0.22, 8]} />
             <meshStandardMaterial color="#fff0d8" />
           </mesh>
-          <mesh position={[0.24, -0.02, -0.02]} rotation={[0, 0, 0.5]}>
-            <coneGeometry args={[0.05, 0.14, 8]} />
+          <mesh position={[0.26, -0.02, -0.02]} rotation={[0, 0, 0.5]}>
+            <coneGeometry args={[0.07, 0.22, 8]} />
             <meshStandardMaterial color="#fff0d8" />
           </mesh>
           {/* Glasses — two rings + bridge */}
@@ -167,6 +170,15 @@ export default function PrincessElf({ position = [0, 0, 0] }: Props) {
           <mesh position={[0, 0, 0.23]}>
             <boxGeometry args={[0.08, 0.01, 0.01]} />
             <meshStandardMaterial color="#2a1d15" />
+          </mesh>
+          {/* Eye shine highlights — visible as little sparkles even through closed lids */}
+          <mesh position={[-0.086, 0.018, 0.248]}>
+            <sphereGeometry args={[0.012, 6, 6]} />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1.2} />
+          </mesh>
+          <mesh position={[0.114, 0.018, 0.248]}>
+            <sphereGeometry args={[0.012, 6, 6]} />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1.2} />
           </mesh>
           {/* Eyelids (closed = sleeping); shrink when awake */}
           <mesh ref={lidLRef} position={[-0.1, -0.005, 0.245]}>

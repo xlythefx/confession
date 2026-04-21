@@ -10,8 +10,8 @@ interface Props {
 // damped so every motion feels cozy rather than snappy.
 export default function FollowCamera({ targetRef }: Props) {
   const { camera } = useThree();
-  const current = useRef(new THREE.Vector3(0, 4, 18));
-  const lookAt = useRef(new THREE.Vector3(0, 1, 0));
+  const current = useRef(new THREE.Vector3(0, 5.5, 18));
+  const lookAt = useRef(new THREE.Vector3(0, 1.2, 0));
 
   useFrame((_, dt) => {
     const t = targetRef.current;
@@ -22,12 +22,12 @@ export default function FollowCamera({ targetRef }: Props) {
     const desired = t.position
       .clone()
       .add(back.multiplyScalar(4.2))
-      .add(new THREE.Vector3(0, 2.4, 0));
+      .add(new THREE.Vector3(0, 3.15, 0));
 
     current.current.lerp(desired, 1 - Math.pow(0.001, dt));
     camera.position.copy(current.current);
 
-    const desiredLook = t.position.clone().add(new THREE.Vector3(0, 1, 0));
+    const desiredLook = t.position.clone().add(new THREE.Vector3(0, 1.2, 0));
     lookAt.current.lerp(desiredLook, 1 - Math.pow(0.003, dt));
     camera.lookAt(lookAt.current);
   });

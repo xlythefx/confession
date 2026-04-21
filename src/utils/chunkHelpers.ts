@@ -1,5 +1,6 @@
 export const CHUNK_SIZE = 8;
 export const CHUNK_GRID_RADIUS = 3;
+export const TUFT_BLADES_PER_CHUNK = 15;
 
 export function worldToChunk(x: number, z: number) {
   return {

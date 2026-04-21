@@ -41,17 +41,20 @@ export default function FlowerPickup({ position = [0, 0, 0] }: Props) {
           <cylinderGeometry args={[0.015, 0.015, 0.3, 6]} />
           <meshStandardMaterial color="#6a8b3a" />
         </mesh>
-        {/* Petals */}
+        {/* Petals — physical material with transmission for glassy, glowing look */}
         {Array.from({ length: 6 }).map((_, i) => {
           const a = (i / 6) * Math.PI * 2;
           return (
             <mesh key={i} position={[Math.cos(a) * 0.08, 0, Math.sin(a) * 0.08]} rotation={[0, -a, 0.8]}>
               <sphereGeometry args={[0.07, 10, 8]} />
-              <meshStandardMaterial
+              <meshPhysicalMaterial
                 color="#ffd5ec"
                 emissive="#ff8cc2"
-                emissiveIntensity={0.4}
-                roughness={0.6}
+                emissiveIntensity={0.5}
+                roughness={0.25}
+                transmission={0.45}
+                thickness={0.12}
+                ior={1.4}
               />
             </mesh>
           );
@@ -62,7 +65,7 @@ export default function FlowerPickup({ position = [0, 0, 0] }: Props) {
           <meshStandardMaterial
             color="#fff2a8"
             emissive="#ffd46a"
-            emissiveIntensity={1.2}
+            emissiveIntensity={1.4}
           />
         </mesh>
         <pointLight ref={glow} color="#ffd4a8" intensity={0.9} distance={3} decay={2} />

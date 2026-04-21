@@ -1,8 +1,8 @@
-# Before the sun goes down...
+# Clair de lune
 
 A tiny, cozy 3D web experience built with React + Vite + React Three Fiber + Tailwind.
 
-A chibi elf boy walks through a sunset meadow, holding a lamp. He finds a sleeping elf girl beneath a tree. He picks a flower. He offers it.
+A chibi elf boy walks through a moonlit meadow, holding a torch. He finds a sleeping elf girl beneath a tree. He picks a flower. He offers it.
 
 > _Maybe I like you a little._
 
@@ -38,13 +38,13 @@ src/
   index.css                      tailwind + small animations
   components/
     ui/
-      IntroOverlay.tsx           "Before the sun goes down..." + start button
+      IntroOverlay.tsx           title + start button
       GameHUD.tsx                flower icon + interaction prompts
       EndingOverlay.tsx          "Maybe I like you a little." + restart
     game/
       Scene.tsx                  lighting, fog, layout, proximity checks
-      World.tsx                  sky gradient, ground, sun disk
-      Player.tsx                 chibi elf boy + lamp + walk bob
+      World.tsx                  night sky, ground, moon
+      Player.tsx                 chibi elf boy + torch + flower + walk bob
       FollowCamera.tsx           damped third-person camera
       GrassChunks.tsx            instanced grass regenerated per chunk
       Tree.tsx                   stylized low-poly tree
@@ -62,7 +62,7 @@ src/
 ## Design notes
 
 - **No physics, no skeletal rig.** Characters are groups of primitives; motion comes from `useFrame` sin-bobbing and damped rotations.
-- **Grass chunking.** Only the 5x5 chunks around the player's current chunk are populated in a single `InstancedMesh`. When the player crosses a chunk boundary, the buffer is rebuilt from a deterministic hash (so the world feels consistent if you revisit).
+- **Grass chunking.** Only the chunks around the player's current chunk are populated in a single `InstancedMesh`. When the player crosses a chunk boundary, the buffer is rebuilt from a deterministic hash (so the world feels consistent if you revisit).
 - **Fog + sky dome** hide the world edges and make chunk pop-in invisible.
 - **Emotional beat** = emissive ramp, scale tween, lid close→open, and head tilt. No dialogue system needed.
 
@@ -73,6 +73,6 @@ Audio is intentionally omitted to keep setup zero-asset. To add it, drop `ogg`/`
 ## Performance
 
 - `dpr` capped at 1.5
-- Grass uses a single instanced mesh (~900 blades max)
+- Grass uses a single instanced mesh (many blades, one draw)
 - One directional shadow with a modest 1024 map
 - Primitive geometry everywhere — no imported models

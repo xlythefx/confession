@@ -22,7 +22,7 @@ export default function IntroOverlay() {
     >
       <div className="text-center px-8 fade-in">
         <p className="text-slate-200 text-3xl md:text-5xl font-serif tracking-wide italic drop-shadow-[0_0_20px_rgba(180,210,255,0.25)]">
-          Under the moon, the meadow waits...
+          Clair de lune
         </p>
         <button
           onClick={onStart}

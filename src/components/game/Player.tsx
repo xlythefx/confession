@@ -9,9 +9,9 @@ const WALK_SPEED = 1.6;
 const RUN_MULT = 1.8;
 const TURN_SMOOTH = 8;
 
-/** Body-local: floating torch at side; flower ~20% lower than prior chest hold */
-const TORCH_SIDE = new THREE.Vector3(0.3, 0.56, 0.055);
-const FLOWER_HOLD = new THREE.Vector3(-0.2, 0.816, 0.12);
+/** Body-local: floating torch at side; flower hold position */
+const TORCH_SIDE = new THREE.Vector3(0.3, 0.50, 0.055);
+const FLOWER_HOLD = new THREE.Vector3(-0.2, 0.76 * 0.7, 0.12);
 
 /** Held bloom — stem hangs from grip point. */
 function HeldFlower() {
@@ -134,14 +134,17 @@ const Player = forwardRef<THREE.Group>((_, ref) => {
 
     const torch = torchMountRef.current;
     if (torch) {
-      torch.position.lerp(TORCH_SIDE, 1 - Math.exp(-11 * dt));
+      // Before pickup: torch on right. After pickup: swap — torch on left (flower side).
+      const torchTarget = hf ? FLOWER_HOLD : TORCH_SIDE;
+      torch.position.lerp(torchTarget, 1 - Math.exp(-11 * dt));
       torch.rotation.x = THREE.MathUtils.damp(torch.rotation.x, -0.22, 9, dt);
       torch.rotation.z = THREE.MathUtils.damp(torch.rotation.z, moving ? sway * 0.12 : 0, 6, dt);
     }
 
     if (flowerRef.current && hf) {
       const wobble = Math.sin(walkPhase.current * 1.5) * 0.028;
-      flowerRef.current.position.set(FLOWER_HOLD.x, FLOWER_HOLD.y + wobble, FLOWER_HOLD.z);
+      // Flower moves to former torch side (right).
+      flowerRef.current.position.set(TORCH_SIDE.x, TORCH_SIDE.y + wobble, TORCH_SIDE.z);
       flowerRef.current.rotation.z = THREE.MathUtils.damp(
         flowerRef.current.rotation.z,
         moving ? sway * 0.1 : 0,
@@ -166,69 +169,158 @@ const Player = forwardRef<THREE.Group>((_, ref) => {
   return (
     <group ref={groupRef} position={[0, 0, 10]}>
       <group ref={bodyRef}>
-        {/* Body / tunic */}
-        <mesh castShadow position={[0, 0.38, 0]}>
-          <coneGeometry args={[0.28, 0.7, 12]} />
+        {/* Body / tunic — shorter cone for chibi head-to-body ratio */}
+        <mesh castShadow position={[0, 0.34, 0]}>
+          <coneGeometry args={[0.28, 0.58, 12]} />
           <meshStandardMaterial color="#6ea36e" roughness={0.9} />
         </mesh>
         {/* Belt */}
-        <mesh position={[0, 0.18, 0]}>
+        <mesh position={[0, 0.14, 0]}>
           <torusGeometry args={[0.22, 0.035, 8, 16]} />
           <meshStandardMaterial color="#7a4a2a" roughness={0.8} />
         </mesh>
-        {/* Legs */}
-        <mesh castShadow position={[-0.09, 0.05, 0]}>
-          <cylinderGeometry args={[0.07, 0.07, 0.22, 8]} />
+        {/* Legs — chubby chibi */}
+        <mesh castShadow position={[-0.09, 0.04, 0]}>
+          <cylinderGeometry args={[0.085, 0.085, 0.22, 8]} />
           <meshStandardMaterial color="#3b2a1e" roughness={0.9} />
         </mesh>
-        <mesh castShadow position={[0.09, 0.05, 0]}>
-          <cylinderGeometry args={[0.07, 0.07, 0.22, 8]} />
+        <mesh castShadow position={[0.09, 0.04, 0]}>
+          <cylinderGeometry args={[0.085, 0.085, 0.22, 8]} />
           <meshStandardMaterial color="#3b2a1e" roughness={0.9} />
         </mesh>
-        {/* Head */}
-        <mesh castShadow position={[0, 0.88, 0]}>
-          <sphereGeometry args={[0.26, 18, 16]} />
+        {/* Head — bigger for chibi proportions */}
+        <mesh castShadow position={[0, 0.92, 0]}>
+          <sphereGeometry args={[0.30, 18, 16]} />
           <meshStandardMaterial color="#ffe2c0" roughness={0.85} />
         </mesh>
-        {/* Curly hair — cluster of small spheres */}
-        <group position={[0, 1.04, 0]}>
-          {Array.from({ length: 14 }).map((_, i) => {
-            const a = (i / 14) * Math.PI * 2;
-            const r = 0.23 + ((i * 7) % 5) * 0.012;
-            const y = 0.02 + Math.sin(i * 1.7) * 0.07;
+        {/* Curly hair — full volume (outer + inner rings), crown, bangs, sides, back */}
+        <group position={[0, 1.10, 0]}>
+          {/* Outer ring — many curls */}
+          {Array.from({ length: 36 }).map((_, i) => {
+            const a = (i / 36) * Math.PI * 2;
+            const r = 0.28 + ((i * 7) % 7) * 0.012;
+            const y = 0.02 + Math.sin(i * 1.35) * 0.1;
+            const isHighlight = i % 6 === 0;
             return (
-              <mesh key={i} position={[Math.cos(a) * r, y, Math.sin(a) * r]} castShadow>
-                <sphereGeometry args={[0.09 + ((i * 3) % 4) * 0.01, 10, 8]} />
-                <meshStandardMaterial color="#6b3b22" roughness={0.9} />
+              <mesh key={`o${i}`} position={[Math.cos(a) * r, y, Math.sin(a) * r]} castShadow>
+                <sphereGeometry args={[0.088 + ((i * 3) % 5) * 0.011, 10, 8]} />
+                <meshStandardMaterial
+                  color={isHighlight ? '#8b5a3a' : '#5a3018'}
+                  roughness={isHighlight ? 0.75 : 0.92}
+                />
               </mesh>
             );
           })}
-          <mesh position={[0, 0.08, 0]} castShadow>
-            <sphereGeometry args={[0.13, 12, 10]} />
-            <meshStandardMaterial color="#6b3b22" roughness={0.9} />
+          {/* Inner ring — fills scalp so crown doesn’t read bald */}
+          {Array.from({ length: 18 }).map((_, i) => {
+            const a = (i / 18) * Math.PI * 2 + 0.2;
+            const r = 0.14 + ((i * 5) % 4) * 0.018;
+            const y = 0.04 + Math.sin(i * 2.1) * 0.05;
+            return (
+              <mesh key={`i${i}`} position={[Math.cos(a) * r, y, Math.sin(a) * r]} castShadow>
+                <sphereGeometry args={[0.062 + (i % 3) * 0.01, 8, 6]} />
+                <meshStandardMaterial color="#4a2818" roughness={0.9} />
+              </mesh>
+            );
+          })}
+          {/* Main crown — wider, slightly taller */}
+          <mesh position={[0, 0.13, 0]} castShadow scale={[1.08, 1.12, 1.05]}>
+            <sphereGeometry args={[0.17, 14, 12]} />
+            <meshStandardMaterial color="#5a3018" roughness={0.9} />
           </mesh>
+          {/* Top puff stack — extra height on zenith */}
+          <mesh position={[0, 0.24, -0.02]} castShadow scale={[0.95, 0.88, 0.95]}>
+            <sphereGeometry args={[0.11, 10, 8]} />
+            <meshStandardMaterial color="#4a2818" roughness={0.88} />
+          </mesh>
+          {/* Forehead bangs — wider row */}
+          {Array.from({ length: 7 }).map((_, i) => {
+            const bx = (i - 3) * 0.072;
+            return (
+              <mesh key={`b${i}`} position={[bx, -0.02, 0.23]} castShadow>
+                <sphereGeometry args={[0.07, 8, 6]} />
+                <meshStandardMaterial color="#4a2818" roughness={0.88} />
+              </mesh>
+            );
+          })}
+          {/* Sideburns / temple fill */}
+          <mesh position={[-0.24, 0.02, 0.12]} castShadow scale={[0.85, 1.1, 0.9]}>
+            <sphereGeometry args={[0.08, 8, 6]} />
+            <meshStandardMaterial color="#5a3018" roughness={0.9} />
+          </mesh>
+          <mesh position={[0.24, 0.02, 0.12]} castShadow scale={[0.85, 1.1, 0.9]}>
+            <sphereGeometry args={[0.08, 8, 6]} />
+            <meshStandardMaterial color="#5a3018" roughness={0.9} />
+          </mesh>
+          {/* Back-of-head bulk */}
+          <mesh position={[0, 0.06, -0.22]} castShadow scale={[1.15, 0.92, 1.05]}>
+            <sphereGeometry args={[0.12, 10, 8]} />
+            <meshStandardMaterial color="#4a2818" roughness={0.9} />
+          </mesh>
+          <mesh position={[-0.1, 0.1, -0.2]} castShadow>
+            <sphereGeometry args={[0.075, 8, 6]} />
+            <meshStandardMaterial color="#5a3018" roughness={0.9} />
+          </mesh>
+          <mesh position={[0.1, 0.1, -0.2]} castShadow>
+            <sphereGeometry args={[0.075, 8, 6]} />
+            <meshStandardMaterial color="#5a3018" roughness={0.9} />
+          </mesh>
+          {/* Snow caught in hair */}
+          {[
+            [0.12, 0.14, 0.08],
+            [-0.16, 0.08, -0.04],
+            [0.08, 0.2, -0.1],
+            [-0.06, 0.18, 0.14],
+            [0.2, 0.02, 0.02],
+            [0, 0.22, 0.06],
+            [-0.12, 0.16, 0.16],
+          ].map(([sx, sy, sz], i) => (
+            <mesh key={`s${i}`} position={[sx, sy, sz]}>
+              <sphereGeometry args={[0.022, 6, 6]} />
+              <meshStandardMaterial color="#f2f8ff" roughness={0.4} metalness={0.05} />
+            </mesh>
+          ))}
         </group>
-        {/* Ears — pointy elf */}
-        <mesh position={[-0.26, 0.88, 0]} rotation={[0, 0, -0.4]}>
-          <coneGeometry args={[0.06, 0.16, 8]} />
+        {/* Ears — long pointy elf */}
+        <mesh position={[-0.30, 0.92, 0]} rotation={[0, 0, -0.4]}>
+          <coneGeometry args={[0.08, 0.24, 8]} />
           <meshStandardMaterial color="#ffe2c0" roughness={0.85} />
         </mesh>
-        <mesh position={[0.26, 0.88, 0]} rotation={[0, 0, 0.4]}>
-          <coneGeometry args={[0.06, 0.16, 8]} />
+        <mesh position={[0.30, 0.92, 0]} rotation={[0, 0, 0.4]}>
+          <coneGeometry args={[0.08, 0.24, 8]} />
           <meshStandardMaterial color="#ffe2c0" roughness={0.85} />
         </mesh>
-        {/* Eyes */}
-        <mesh position={[-0.09, 0.88, 0.23]}>
-          <sphereGeometry args={[0.025, 8, 8]} />
+        {/* Eyes — bigger, rounder chibi */}
+        <mesh position={[-0.10, 0.91, 0.27]}>
+          <sphereGeometry args={[0.038, 10, 10]} />
           <meshStandardMaterial color="#1c1410" />
         </mesh>
-        <mesh position={[0.09, 0.88, 0.23]}>
-          <sphereGeometry args={[0.025, 8, 8]} />
+        {/* Left eye shine */}
+        <mesh position={[-0.086, 0.924, 0.298]}>
+          <sphereGeometry args={[0.012, 6, 6]} />
+          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1} />
+        </mesh>
+        <mesh position={[0.10, 0.91, 0.27]}>
+          <sphereGeometry args={[0.038, 10, 10]} />
           <meshStandardMaterial color="#1c1410" />
+        </mesh>
+        {/* Right eye shine */}
+        <mesh position={[0.114, 0.924, 0.298]}>
+          <sphereGeometry args={[0.012, 6, 6]} />
+          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1} />
+        </mesh>
+        {/* Blush dots */}
+        <mesh position={[-0.20, 0.87, 0.25]}>
+          <sphereGeometry args={[0.045, 8, 8]} />
+          <meshStandardMaterial color="#f49aa8" transparent opacity={0.55} />
+        </mesh>
+        <mesh position={[0.20, 0.87, 0.25]}>
+          <sphereGeometry args={[0.045, 8, 8]} />
+          <meshStandardMaterial color="#f49aa8" transparent opacity={0.55} />
         </mesh>
 
         {/* Floating torch — compact scale, stays at side even with flower */}
-        <group ref={torchMountRef} position={[0.3, 0.56, 0.055]} rotation={[-0.22, 0, 0]}>
+        <group ref={torchMountRef} position={[0.3, 0.50, 0.055]} rotation={[-0.22, 0, 0]}>
           <group rotation={[0.18, 0, 0]} scale={0.62}>
             <mesh position={[0, -0.15, 0]}>
               <cylinderGeometry args={[0.038, 0.042, 0.36, 8]} />
@@ -272,9 +364,9 @@ const Player = forwardRef<THREE.Group>((_, ref) => {
           </group>
         </group>
 
-        {/* Floating flower — slightly lower than before */}
+        {/* Floating flower — spawns on swapped (torch) side once picked up */}
         {hasFlower ? (
-          <group ref={flowerRef} position={[-0.2, 0.816, 0.12]}>
+          <group ref={flowerRef} position={[TORCH_SIDE.x, TORCH_SIDE.y, TORCH_SIDE.z]}>
             <HeldFlower />
           </group>
         ) : null}

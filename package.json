@@ -1,5 +1,5 @@
 {
-  "name": "sunset-confession",
+  "name": "clair-de-lune",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-three/drei": "^9.114.0",
     "@react-three/fiber": "^8.17.10",
+    "@react-three/postprocessing": "^2.16.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.169.0",
